@@ -3,10 +3,19 @@
 # Multi-service container
 # https://docs.docker.com/config/containers/multi-service_container/
 
+
+#start a web server for vnc
+sudo nginx
+#start vnc itself
+/start_vnc.sh
+
+export DISPLAY=:0
+
 # gazebo
 /process1.sh -D
 status=$?
-if [$status -ne 0]; then
+echo "process 1 status = $status"
+if [ $status -ne 0 ]; then
   echo "Failed to start process1: $status"
   exit $status
 fi
@@ -14,7 +23,8 @@ fi
 # xterm
 /process2.sh -D
 status=$?
-if [$status -ne 0]; then
+echo "process 2 status = $status"
+if [ $status -ne 0 ]; then
   echo "Failed to start process2: $status"
   exit $status
 fi
