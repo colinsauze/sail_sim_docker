@@ -1,36 +1,74 @@
 # Docker files for a Gazebo simulation of a sailing robot
 
-This project contains docker files to build and run a ROS / Gazebo
+This project contains docker files to build and run an Ardupilot / Gazebo
 simulation of a sailing robot.
 
 ![Racing Sparrow 750 Simulation](https://github.com/srmainwaring/sail_sim_docker/wiki/images/ocean_waves_rs750_fft.jpg)
 
 ## Quick start
 
+### Running it
+
+
 ```bash
 # Pull the docker image from Docker Hub
-docker pull rhysmainwaring/sail-sim
+docker pull colinsauze/sail_sim_docker:latest
 
-# Run it
-docker-compose -f docker-compose-nvidia.yaml up
+# Run the container in the background
+# change the first 80 to a different number if you want to use a different port
+docker run -d --name sail_sim -p 80:80 colinsauze/sail_sim_docker:latest  
+
+# get the password for VNC
+docker exec sail_sim cat /tmp/passwd
 ```
+Open the VNC console in a browser by going to the IP address of the container or localhost if it's on your PC. 
 
-If you have an AMD card or are running from a virtual machine use
-`docker-compose-vmware.yaml` instead. For WSL use `docker-compose-wsl.yaml`
 
-You will need to provide the containers `xhost` access to you machine:
-`xhost +` will do this but there are serious security concerns. For a
-discussion on better approaches see the [ROS docker tutorials](http://wiki.ros.org/docker/Tutorials/GUI).
-
+## Usage
 
 The simulation launches a number of screens:
 
 - Gazebo
-- `rviz`
-- `rqt`
-- `rqt_robot_steering`
+- ArduPilot sim_vehicle.py console
+- ArduPilot Rover console
+- MavProxy console
+- MavProxy map
 
-Set the wind using the Gazebo sidebar then unpause the simulation. The horizontal slider on `rqt_robot_steering` controls the rudder. The sails are trimmed automatically.
+The [ArduPilot Sailboat](https://ardupilot.org/rover/docs/sailboat-home.html) documentation has a guide to
+using sailing vehicles with ArduPilot, in particular the sailing modes and parameter tuning.
+
+The [ArduPilot SITL Simulator](https://ardupilot.org/dev/docs/sitl-simulator-software-in-the-loop.html)
+documentation explains how to configure and use the simulator.
+
+### Demo mission
+
+Load the mission way points:
+
+- From the MavProxy console 'Mission' menu select 'Editor'
+- Click the 'Load WP File' button and open `/catkin_ws/install/share/rs750_gazebo/config/sailboat_missions.txt`
+- Click 'Write WPs' to load them to the flight controller
+- At this point you should see the waypoints in the MavProxy map.
+
+![Mission Editor](https://github.com/srmainwaring/sail_sim_docker/wiki/images/mission_editor.jpg)
+
+![Map Waypoints](https://github.com/srmainwaring/sail_sim_docker/wiki/images/map_waypoints.jpg)
+
+
+Prepare the sailboat:
+
+- In the `sim_vehicle.py` console arm the throttle: `MANUAL> arm throttle force` (to override PreArm EKF calibration warnings)
+- Set the mode to auto: `MANUAL> mode auto`
+
+Update the Gazebo wind environment:
+
+- At initialisation the Gazebo environment settings are switched off. Without this the gyro and EFK calibration will not initialise correctly.
+- Using the Gazebo sidebar set the wind `linear_velocity.x = 10.0`
+- The sailboat should start moving under autopilot control around the triangular course.
+
+![Gazebo Auto](https://github.com/srmainwaring/sail_sim_docker/wiki/images/gazebo_mip.jpg)
+
+![Map Auto](https://github.com/srmainwaring/sail_sim_docker/wiki/images/map_mip.jpg)
+
 
 ## Dependencies
 
@@ -44,6 +82,9 @@ The project depends on the following:
   - [rs750](https://github.com/srmainwaring/rs750.git)
 - sensor plugins:
   - [hector-gazebo-plugins](http://wiki.ros.org/hector_gazebo_plugins)
+- modified versions of ardupilot and ardupilot_gazebo:
+  - [ardupilot](https://github.com/srmainwaring/ardupilot)
+  - [ardupilot_gazebo](https://github.com/srmainwaring/ardupilot_gazebo)
 
 In addition there are a number of maths libraries and hardware acceleration drivers layered into the image. The Dockerfile has the full details.
 
@@ -54,9 +95,8 @@ In addition there are a number of maths libraries and hardware acceleration driv
 git clone https://github.com/srmainwaring/sail_sim_docker.git
 
 # Build the image
-docker build -t rhysmainwaring/sail-sim .
+docker build -t rhysmainwaring/sail-sim-ardupilot .
 ```
-
 
 ## Build Status
 
