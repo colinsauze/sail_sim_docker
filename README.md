@@ -1,14 +1,15 @@
-# Docker files for a Gazebo simulation of a sailing robot
+# Cloud Ready Gazebo simulation of a sailing robot
 
 This project contains docker files to build and run an Ardupilot / Gazebo
-simulation of a sailing robot.
+simulation of a sailing robot. It displays its output on a webpage using Web VNC and is intended for cloud deployments.
+
+Getting this to perform at anything near realtime speeds requires *A LOT* of CPU resources and will cost in region of US $1 per hour. See the performance section for details.
 
 ![Racing Sparrow 750 Simulation](https://github.com/srmainwaring/sail_sim_docker/wiki/images/ocean_waves_rs750_fft.jpg)
 
 ## Quick start
 
 ### Running it
-
 
 ```bash
 # Pull the docker image from Docker Hub
@@ -21,8 +22,36 @@ docker run -d --name sail_sim -p 80:80 colinsauze/sail_sim_docker:latest
 # get the password for VNC
 docker exec sail_sim cat /tmp/passwd
 ```
+
 Open the VNC console in a browser by going to the IP address of the container or localhost if it's on your PC. 
 
+
+#### Deploying on Google Cloud
+
+You'll need some credit with Google Cloud. New users can get $300 but will have to give a credit card, you aren't charged unless you upgrade to a paid package. 
+
+* Go to Google Cloud console https://console.cloud.google.com/
+* Click on the grill menu in the top left corner, choose Computer Engine->VM Instance.
+![VM Instances page](google_cloud_1.png)
+* Click on the plus button in the top middle next to the text "VM Instances" to create a new instance.
+![Create Instance page](google_cloud_2.png)
+* Enter a name for the instance (e.g. sail-sim)
+![Create Instance Details part 1](google_cloud_3.png)
+* Choose a machine configuration with at least 8 CPU cores and 2GB of RAM. Don't use a shared core (e.g. e2-micro, e2-small or e2-medium). n2-standard-16 or n2d-standard-16 are recommended, if that's not possible/too expensive try e2-standard-32 
+![Create Instance Details part 2](google_cloud_4.png)
+* Under boot disk choose the "Container Optimised OS" version 81 with a 15GB boot disk.
+![Create Instance Details part 3](google_cloud_5.png)
+* Tick the "allow HTTP traffic" box under firewall.
+* If you want command line SSH access, Click two down arrows next to the the "Management, security, disks, networking, sole tenacny" link, Go to the security tab and paste in your public SSH key
+* Click the create button
+![List of instances](google_cloud_6.png)
+* Now click the "SSH" link next to the new instance or ssh to its public IP address from your command line (if you added an SSH key), the username specified in the key will have been created on the VM for you.
+* Follow the instructions above to download and start the container and get the VNC password.
+![Connecting to VNC](vnc_connect.png)
+* Click on the hyperlink to the external IP address to open the VNC webpage, click connect and enter the password.
+![Entering VNC password](vnc_password.png)
+* Don't forget to delete the instance when you are done, you will be billed as long as it exists.
+![Simulation running in the Cloud](running.png)
 
 ## Usage
 
@@ -105,6 +134,17 @@ docker build -t rhysmainwaring/sail-sim-ardupilot .
 | asv_wave_sim | [![Build Status](https://travis-ci.org/srmainwaring/asv_wave_sim.svg?branch=feature%2Ffft_waves)](https://travis-ci.org/srmainwaring/asv_wave_sim) |
 | asv_sim | [![Build Status](https://travis-ci.org/srmainwaring/asv_sim.svg?branch=feature%2Fwrsc-devel)](https://travis-ci.org/srmainwaring/asv_sim) |
 | rs750 | [![Build Status](https://travis-ci.org/srmainwaring/rs750.svg?branch=feature%2Fwrsc-devel)](https://travis-ci.org/srmainwaring/rs750) |
+
+
+## Performance
+
+Core count, Cloud Provider, GPU type, speed (1.0 = real time)
+4 cores, Google Cloud, AMD Rome (n2d-custom), 0.41-0.5
+8 cores, Google Cloud, AMD Rome (n2d-custom), 0.59-0.71
+16 cores, Google Cloud, Intel Haswell (e2-custom), 0.73-0.8
+16 cores, vultr, Intel Cascade Lake, 0.8-0.84
+32 cores, Amazon, AMD EPYC 7571, 0.85-0.88
+
 
 
 ## License
