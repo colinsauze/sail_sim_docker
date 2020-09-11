@@ -5,8 +5,6 @@ ARG TERM=xterm
 
 WORKDIR /ardupilot
 
-
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-utils \
     build-essential \
@@ -23,20 +21,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python-rosinstall-generator \
     wget \
     x11-apps \
-    && rm -rf /var/lib/apt/lists/*
-
-# Additional ROS dependencies
-# in rosdeps:
-#   cgal
-#   ocl-icd-opencl-dev
-#   opencl-headers
-# 
-# not in rosdeps
-#   fftw3
-#   libclfft-dev
-#   libfftw3-dev
-# 
-RUN apt-get update && apt-get install -y --no-install-recommends \	
     fftw3 \
     libcgal-dev \
     libclfft-dev \
@@ -45,8 +29,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     opencl-headers \
     ros-melodic-hector-gazebo-plugins \
     ros-melodic-imu-tools \
+    lsb-release \
+    sudo \
+    software-properties-common \
+    pwgen \
+    tzdata \
+    psmisc \
+    net-tools \
+    tigervnc-common \
+    tigervnc-standalone-server \
+    jwm \
+    xterm \
+    nano \
+    expect \
+    nginx \
+    unzip \
+    lxterminal \
     && rm -rf /var/lib/apt/lists/*
-
 
 
 # Install python packages
@@ -69,23 +68,16 @@ RUN useradd -U -d /ardupilot ardupilot && \
     usermod -G users ardupilot
 
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    lsb-release \
-    sudo \
-    software-properties-common \
-    && rm -rf /var/lib/apt/lists/*
-
 ENV USER=ardupilot
 RUN cd / && git clone https://github.com/srmainwaring/ardupilot.git -b feature/gazebo_sailboat_poc
 
-RUN echo "ardupilot ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ardupilot
-RUN chmod 0440 /etc/sudoers.d/ardupilot
-
-RUN chown -R ardupilot:ardupilot /ardupilot
+RUN echo "ardupilot ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ardupilot && \
+    chmod 0440 /etc/sudoers.d/ardupilot && \
+    chown -R ardupilot:ardupilot /ardupilot
 
 USER ardupilot
-RUN /ardupilot/Tools/environment_install/install-prereqs-ubuntu.sh -y
-RUN sudo apt-get clean \
+RUN /ardupilot/Tools/environment_install/install-prereqs-ubuntu.sh -y && \
+    sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN make sitl
@@ -109,10 +101,7 @@ COPY start_vnc.sh /
 
 ENV TZ=Europe/London
 
-RUN apt-get update && \
-    apt-get install -y pwgen tzdata psmisc net-tools && \
-    apt-get install -y tigervnc-standalone-server jwm xterm wget nano expect nginx unzip lxterminal && \
-    chmod 777 /*.sh && \
+RUN chmod 777 /*.sh && \
     cd /opt && wget https://github.com/novnc/noVNC/archive/v1.0.0.tar.gz -O /tmp/webvnc-v1.0.0.tar.gz && \
     tar xvfz /tmp/webvnc-v1.0.0.tar.gz && chown -R ardupilot:ardupilot /opt/* && \
     ln -s /opt/noVNC-1.0.0/vnc.html /opt/noVNC-1.0.0/index.html && \
@@ -171,9 +160,8 @@ RUN sudo chmod +x /gazebo_entrypoint.sh \
     && sudo chmod +x /process2.sh \
     && sudo chmod +x /multi_process.sh
 
-# expose port 8000 for vnc web server
-EXPOSE 8000
+# expose port 80 for the web server
+EXPOSE 80
 
-# Clear the inherited ROS entrypoint
-ENTRYPOINT [""]
+ENTRYPOINT ["/multi_process.sh"]
 CMD ["bash"]

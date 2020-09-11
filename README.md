@@ -9,7 +9,10 @@ simulation of a sailing robot.
 
 ```bash
 # Pull the docker image from Docker Hub
-docker pull rhysmainwaring/sail-sim-ardupilot
+docker pull colinsauze/sail_sim_docker:latest
+docker run -d --name sail_sim -p 80:80 colinsauze/sail_sim_docker:latest
+docker exec sail_sim cat /tmp/passwd
+
 
 # Run it
 docker-compose -f docker-compose.yaml up
