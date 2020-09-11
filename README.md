@@ -143,12 +143,13 @@ docker build -t rhysmainwaring/sail-sim-ardupilot .
 
 ## Performance
 
-Core count, Cloud Provider, GPU type, speed (1.0 = real time)
-4 cores, Google Cloud, AMD Rome (n2d-custom), 0.41-0.5
-8 cores, Google Cloud, AMD Rome (n2d-custom), 0.59-0.71
-16 cores, Google Cloud, Intel Haswell (e2-custom), 0.73-0.8
-16 cores, vultr, Intel Cascade Lake, 0.8-0.84
-32 cores, Amazon, AMD EPYC 7571, 0.85-0.88
+| Core count | Cloud Provider | CPU type | speed (1.0 = real time)|
+| ---------- | -------------- | -------- | -----------------------|
+| 4 cores | Google Cloud | AMD Rome (n2d-custom)| 0.41-0.5 |
+| 8 cores | Google Cloud | AMD Rome (n2d-custom)| 0.59-0.71|
+| 16 cores | Google Cloud| Intel Haswell (e2-custom)| 0.73-0.8|
+| 16 cores | Vultr | Intel Cascade Lake | 0.8-0.84 |
+| 32 cores | Amazon| AMD EPYC 7571 | 0.85-0.88 |
 
 
 
