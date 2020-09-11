@@ -46,6 +46,7 @@ You'll need some credit with Google Cloud. New users can get $300 but will have 
 * Click the create button
 ![List of instances](google_cloud_6.png)
 * Now click the "SSH" link next to the new instance or ssh to its public IP address from your command line (if you added an SSH key), the username specified in the key will have been created on the VM for you.
+![Run the container](run_container.gif)
 * Follow the instructions above to download and start the container and get the VNC password.
 ![Connecting to VNC](vnc_connect.png)
 * Click on the hyperlink to the external IP address to open the VNC webpage, click connect and enter the password.
